@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: demo-app-appset
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: secured-cluster-placement
+        requeueAfterSeconds: 30
+  template:
+    metadata:
+      name: demo-app-appset-{{name}}
+      labels:
+        velero.io/exclude-from-backup: "true"
+    spec:
+      destination:
+        namespace: default
+        server: "{{server}}"
+      ignoreDifferences:
+      - group: "apps"
+        kind: "Deployment"
+        jsonPointers:
+        - /spec/template/spec/containers
+
+      project: default
+      sources:
+         - repoURL: 'https://github.com/acm-demo/sampleapp.git'
+           targetRevision: main
+           path: 'manifests/'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true
+          - RespectIgnoreDifferences=true

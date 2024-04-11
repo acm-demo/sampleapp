@@ -26,7 +26,7 @@ spec:
         jsonPointers:
         - /spec/template/spec/containers
 
-      project: default
+      project: demoapp
       sources:
          - repoURL: 'https://github.com/acm-demo/sampleapp.git'
            targetRevision: main
